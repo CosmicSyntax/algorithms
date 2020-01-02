@@ -3,11 +3,10 @@ use std::slice;
 pub fn invert(ar: *mut i32, n: usize) -> u32 {
     /*
         Implementing sorting algorithm was a bit troublsome using rc and refcell.
-        It required quiet a number of borrow and borrow_mut() methods.
+        It required quite a number of borrow and borrow_mut() methods.
         Instead used unsafe and within a safe abstraction. Code is not optimized.
     */
     unsafe {
-
         let mid = ((n as f32) / 2 as f32).ceil() as usize;
 
         let left = slice::from_raw_parts_mut(ar, mid);
@@ -34,6 +33,10 @@ pub fn invert(ar: *mut i32, n: usize) -> u32 {
                     *ar.offset(k as isize) = right[j];
                     j += 1;
                     cnt += (ilim - i) as u32;
+                } else if left[i] == right[j] {
+                    // edge case where equals
+                    *ar.offset(k as isize) = right[j];
+                    j += 1;
                 } else {
                     *ar.offset(k as isize) = left[i];
                     i += 1;
@@ -50,5 +53,32 @@ pub fn invert(ar: *mut i32, n: usize) -> u32 {
         }
 
         return cnt;
+    }
+}
+
+// Unit Testing
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn check_order() {
+        let mut start = [9, 1, 2, 8, 10, 10];
+        let end = [1, 2, 8, 9, 10, 10];
+
+        let _ = invert(start.as_mut_ptr(), 5usize);
+
+        assert_eq!(end, start);
+    }
+
+    #[test]
+    fn check_invert() {
+        let mut start = [9, 1, 2, 8, 10];
+
+        let n = invert(start.as_mut_ptr(), 5usize);
+
+        assert_eq!(3, n);
     }
 }
